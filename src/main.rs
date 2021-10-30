@@ -3,12 +3,13 @@ fn main() {
     println!("{:#?}", spans);
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct Span<'a> {
     kind: MarkdownKind,
     s: &'a str,
 }
 
+#[derive(Debug)]
 struct Marker {
     kind: MarkdownKind,
     loc: usize,
@@ -70,7 +71,7 @@ fn parse_md(input: &str) -> Vec<Span> {
                 Some((_, '*')) => match char_indices.get(idx + 2) {
                     Some((_, '_')) => match char_indices.get(idx + 3) {
                         Some((_, '_')) => MarkdownKind::BoldUnderline,
-                        _ => MarkdownKind::BoldUnderline,
+                        _ => MarkdownKind::BoldItalic,
                     },
                     Some((_, '*')) => match char_indices.get(idx + 3) {
                         Some((_, '_')) => match char_indices.get(idx + 3) {
@@ -84,8 +85,11 @@ fn parse_md(input: &str) -> Vec<Span> {
                 _ => MarkdownKind::Italic,
             },
             '_' => match char_indices.get(idx + 1) {
+                Some((_, '*')) => match char_indices.get(idx + 2) {
+                    Some((_, '*')) => MarkdownKind::BoldItalic,
+                    _ => MarkdownKind::Italic,
+                },
                 Some((_, '_')) => match char_indices.get(idx + 2) {
-                    Some((_, '_')) => MarkdownKind::ItalicUnderline,
                     Some((_, '*')) => match char_indices.get(idx + 3) {
                         Some((_, '*')) => match char_indices.get(idx + 4) {
                             Some((_, '*')) => MarkdownKind::BoldItalicUnderline,
@@ -93,6 +97,7 @@ fn parse_md(input: &str) -> Vec<Span> {
                         },
                         _ => MarkdownKind::ItalicUnderline,
                     },
+                    Some((_, '_')) => MarkdownKind::ItalicUnderline,
                     _ => MarkdownKind::Underline,
                 },
                 _ => MarkdownKind::Italic,
@@ -122,6 +127,8 @@ fn parse_md(input: &str) -> Vec<Span> {
         //  stack is empty, this is the beginning, open a span
         //  stack is not empty, top.kind is other, open a new span
         //  stack is not empty, top.kind is the same as kind, close the top span
+        //
+        dbg!(&stack.last());
 
         let state = match stack.last() {
             None => State::Opening,
@@ -144,4 +151,82 @@ fn parse_md(input: &str) -> Vec<Span> {
         idx += kind.len();
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bold() {
+        let spans = parse_md("**hello world**");
+        println!("{:#?}", spans);
+        assert_eq!(
+            spans[0],
+            Span {
+                kind: MarkdownKind::Bold,
+                s: "hello world"
+            }
+        );
+    }
+    #[test]
+    fn italics1() {
+        let spans = parse_md("*hello world*");
+        println!("{:#?}", spans);
+        assert_eq!(
+            spans[0],
+            Span {
+                kind: MarkdownKind::Italic,
+                s: "hello world"
+            }
+        );
+    }
+    #[test]
+    fn italics2() {
+        let spans = parse_md("_hello world_");
+        println!("{:#?}", spans);
+        assert_eq!(
+            spans[0],
+            Span {
+                kind: MarkdownKind::Italic,
+                s: "hello world"
+            }
+        );
+    }
+    #[test]
+    fn italics2bold() {
+        let spans = parse_md("_**hello world**_");
+        println!("{:#?}", spans);
+        assert_eq!(
+            spans[0],
+            Span {
+                kind: MarkdownKind::BoldItalic,
+                s: "hello world"
+            }
+        );
+    }
+    #[test]
+    fn bolditalics1() {
+        let spans = parse_md("***hello world***");
+        println!("{:#?}", spans);
+        assert_eq!(
+            spans[0],
+            Span {
+                kind: MarkdownKind::BoldItalic,
+                s: "hello world"
+            }
+        );
+    }
+    #[test]
+    fn bolditalics2() {
+        let spans = parse_md("**_hello world_**");
+        println!("{:#?}", spans);
+        assert_eq!(
+            spans[0],
+            Span {
+                kind: MarkdownKind::BoldItalic,
+                s: "hello world"
+            }
+        );
+    }
 }
