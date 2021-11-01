@@ -48,3 +48,9 @@ pub enum State {
     Closing,
     Opening,
 }
+
+#[derive(Debug)]
+pub enum MdparseError {
+    OutOfRangeError(usize),
+    InternalError(String),
+}

@@ -1,7 +1,8 @@
 use crate::*;
+
 #[test]
-fn bold() {
-    let bold = parse_md("**hello world**");
+fn bold() -> Result<()> {
+    let bold = parse_md("**hello world**")?;
     println!("{:#?}", bold);
     assert_eq!(
         bold[0],
@@ -11,13 +12,15 @@ fn bold() {
             range: 2..13
         }
     );
+
+    Ok(())
 }
 
 #[test]
-fn italics() {
-    let asterisks = parse_md("*hello world*");
+fn italics() -> Result<()> {
+    let asterisks = parse_md("*hello world*")?;
     println!("{:#?}", asterisks);
-    let underscores = parse_md("_hello world_");
+    let underscores = parse_md("_hello world_")?;
     println!("{:#?}", asterisks);
     assert!(asterisks.len() == 1);
     assert_eq!(asterisks, underscores);
@@ -29,13 +32,14 @@ fn italics() {
             range: 1..12
         }
     );
+    Ok(())
 }
 
 #[test]
-fn bold_italics() {
-    let three_asterisks = parse_md("***hello world***");
-    let underscore_double_asterisk = parse_md("**_hello world_**");
-    let double_asterisk_underscore = parse_md("_**hello world**_");
+fn bold_italics() -> Result<()> {
+    let three_asterisks = parse_md("***hello world***")?;
+    let underscore_double_asterisk = parse_md("**_hello world_**")?;
+    let double_asterisk_underscore = parse_md("_**hello world**_")?;
     println!("{:#?}", three_asterisks);
     assert!(three_asterisks.len() == 1);
     assert_eq!(three_asterisks, underscore_double_asterisk);
@@ -48,11 +52,13 @@ fn bold_italics() {
             range: 3..14
         }
     );
+
+    Ok(())
 }
 
 #[test]
-fn underline() {
-    let underline = parse_md("__hello world__");
+fn underline() -> Result<()> {
+    let underline = parse_md("__hello world__")?;
     println!("{:#?}", underline);
     assert_eq!(
         underline[0],
@@ -62,4 +68,6 @@ fn underline() {
             range: 2..13
         }
     );
+
+    Ok(())
 }
