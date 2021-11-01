@@ -37,14 +37,9 @@ fn get_token_kind(c: char, rem: &str) -> Option<MarkdownKind> {
 pub fn parse_md(input: &str) -> Result<Vec<Span>> {
     let mut out = Vec::new();
     let mut stack: Vec<Marker> = Vec::new();
-    let char_indices: Vec<_> = input.char_indices().collect();
+    let mut char_indices = input.char_indices();
 
-    let mut idx = 0;
-
-    while idx < char_indices.len() {
-        let &(byte_idx, c) = char_indices.get(idx).ok_or_else(|| {
-            MdparseError::InternalError("Idx was higher than char_indices.len()".to_owned())
-        })?;
+    while let Some((byte_idx, c)) = char_indices.next() {
         let rem = input
             .get(byte_idx..)
             .ok_or(MdparseError::OutOfRangeError(byte_idx))?;
@@ -52,7 +47,6 @@ pub fn parse_md(input: &str) -> Result<Vec<Span>> {
         let kind = match get_token_kind(c, rem) {
             Some(x) => x,
             None => {
-                idx += 1;
                 continue;
             }
         };
@@ -87,7 +81,9 @@ pub fn parse_md(input: &str) -> Result<Vec<Span>> {
             }
         }
 
-        idx += kind.len();
+        for _ in 0..kind.len() {
+            let _ = char_indices.next();
+        }
     }
     Ok(out)
 }
