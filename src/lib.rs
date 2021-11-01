@@ -34,6 +34,7 @@ fn get_token_kind(c: char, rem: &str) -> Option<MarkdownKind> {
 
 // FIXME: the string `**_a**_` parses as bold italics, but discord renders it as bold with
 // underscores
+/// Parse a string as Discord markdown.
 pub fn parse_md(input: &str) -> Result<Vec<Span>> {
     let mut out = Vec::new();
     let mut stack: Vec<Marker> = Vec::new();
@@ -77,7 +78,7 @@ pub fn parse_md(input: &str) -> Result<Vec<Span>> {
                 let s = input
                     .get(range.clone())
                     .ok_or_else(|| MdparseError::OutOfRangeError(loc + kind.len()))?;
-                out.push(Span { kind, s, range })
+                out.push(Span { kind, s, range });
             }
         }
 

@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 #[derive(Debug, PartialEq, Eq)]
+/// A &str alongside its markdown type and its location within the input.
 pub struct Span<'a> {
     pub kind: MarkdownKind,
     pub s: &'a str,
@@ -8,12 +9,13 @@ pub struct Span<'a> {
 }
 
 #[derive(Debug)]
-pub struct Marker {
-    pub kind: MarkdownKind,
-    pub loc: usize,
+pub(crate) struct Marker {
+    pub(crate) kind: MarkdownKind,
+    pub(crate) loc: usize,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+/// All the types of markdown formatting that a string can have in Discord markdown
 pub enum MarkdownKind {
     Italic,
     Bold,
@@ -28,7 +30,7 @@ pub enum MarkdownKind {
 }
 
 impl MarkdownKind {
-    pub const fn len(&self) -> usize {
+    pub(crate) const fn len(self) -> usize {
         match self {
             MarkdownKind::Italic => 1,
             MarkdownKind::Bold => 2,
@@ -44,7 +46,7 @@ impl MarkdownKind {
     }
 }
 
-pub enum State {
+pub(crate) enum State {
     Closing,
     Opening,
 }
